@@ -1,0 +1,9 @@
+openai
+anthropic
+python-dotenv
+wikipedia
+duckduckgo-search
+requests
+pydantic
+beautifulsoup4
+rich
