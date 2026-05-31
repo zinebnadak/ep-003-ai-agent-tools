@@ -26,6 +26,11 @@ Calculator        — eval a math expression
 - The `code_executor` tool can be a dangerous one. I am running arbitrary Python that an LLM decided to write, so ofc in production I'd sandbox it (Docker, a subprocess with limits, etc.)
 - I wanted to do `memory store` tool but realized it might be to complex for what i know, so I´ll learn to build it later :)
 
+- verbode - agents thought process
+
+
+
+
 ## How to Set Up
 **Prerequisites**
 - 
