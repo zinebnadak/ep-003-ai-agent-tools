@@ -45,6 +45,26 @@ print(file_reader("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md"))
 '''
 
 
+def file_writer(filepath:str, content: str, mode: str = "write") -> ToolResult: # the mode can either be append or write, writing default
+    try: 
+        normalized_path = Path(filepath).resolve()
+        flag = "a" if mode == "append" else "w"
+        with open(normalized_path, flag) as f:
+            f.write(content)
+            return ToolResult(tool_name="file_writer", result=f"Sucessfully written to {filepath}", success = True, error = None)
+    
+    except Exception as e:
+            return ToolResult(tool_name="file_writer", result="", success = False, error = str(e))
+
+
+'''
+Supports both writing (overwriting) and appending
+print(file_writer("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md", "hejdå", "append"))
+'''
+
+
+
+
 
 
 '''
@@ -65,7 +85,7 @@ TOOL_SCHEMAS = [
     },
     {
         "name" : "file_reader",
-        "description" : "This tool opens a file and reads it",
+        "description" : "This tool opens a file at a given filepath and reads it",
         "input_schema" : {
             "type" : "object",
             "properties" : {    
@@ -73,9 +93,27 @@ TOOL_SCHEMAS = [
             },
             "required": ["filepath"]
         }
+    },
+        {
+        "name" : "file_writer",
+        "description" : "This tool opens a file at a given filepath and either writes or appends text given by the user, default is writing",
+        "input_schema" : {
+            "type" : "object",
+            "properties" : {    
+            "filepath" : {"type": "string"},
+            "content" : {"type": "string"},
+            "mode" : {"type": "string"}
+            },
+            "required": ["filepath"],
+            "required": ["content"]
+        }
     }
 
 ]
+
+#if the user says "save this to a file" it writes, if the user says "add this to my notes" it appends
+
+
 
 
 
@@ -86,7 +124,8 @@ Dispatch table maps tool names to functions so run_tool() can look them up
 '''
 TOOLS = {
     "calculator" : calculator,
-    "file_reader" : file_reader
+    "file_reader" : file_reader,
+    "file_writer" : file_writer
 }
 
 
