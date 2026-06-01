@@ -27,18 +27,24 @@ expression_input = str(input("Enter an expression: "))
 print(calculator(expression_input))
 '''
 
+
 def file_reader(filepath: str) -> ToolResult:
     try:
-        content = Path(filepath).resolve().read_text()  #normalizes the path to absolute path, then reads
-        return ToolResult(tool_name="file_reader", result=content, success = True, error = None)
+        normalized_path = Path(filepath).resolve()  #normalizes the path to absolute path, resolves relative to where you're running the script from,
+        with open(normalized_path, "r") as f:
+            content = f.read()
+            return ToolResult(tool_name="file_reader", result=content, success = True, error = None)
     
     except Exception as e:
-        return ToolResult(tool_name="file_reader", result=content, success = False, error = str(e))
+        return ToolResult(tool_name="file_reader", result="Failed to read file", success = False, error = str(e))
         
+
 '''
-Test:
+user must provide the full path
 print(file_reader("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md"))
 '''
+
+
 
 
 '''
@@ -56,8 +62,7 @@ TOOL_SCHEMAS = [
             },
             "required": ["expression"] #arguments that can't be missing when calling the tool goes to required
         }
-    }
-
+    },
     {
         "name" : "file_reader",
         "description" : "This tool opens a file and reads it",
@@ -80,7 +85,7 @@ TOOL_SCHEMAS = [
 Dispatch table maps tool names to functions so run_tool() can look them up
 '''
 TOOLS = {
-    "calculator" : calculator
+    "calculator" : calculator,
     "file_reader" : file_reader
 }
 
