@@ -12,6 +12,7 @@ code_executor
 
 from models import ToolResult
 from pathlib import Path
+from ddgs import DDGS
 import json
 
 def calculator(expression: str) -> ToolResult:      #the user enters an expression, and from this function we will get out predefined model: name, result, success (or error)
@@ -63,7 +64,21 @@ print(file_writer("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md", "hejdå", 
 '''
 
 
-def web_search()
+def web_search(query: str):
+    try: 
+        lines = []
+        results = DDGS().text(query, max_results = 3)
+        for result in results:
+            lines.append(f"{result['title']}\n{result['body']}\n{result['href']}")
+        formatted_result = "\n\n".join(lines)
+        return ToolResult(tool_name="web_search", result=f'Results for "{query}": {formatted_result}', success = True, error = None) 
+    except Exception as e:
+        return ToolResult(tool_name="web_search", result="", success = False, error = str(e))
+
+'''
+The \n characters will render as actual newlines when Claude processes it
+print(web_search("How old can a cat be?"))
+'''
 
 
 
@@ -93,7 +108,7 @@ TOOL_SCHEMAS = [
     },
     {
         "name" : "file_reader",
-        "description" : "This tool opens a file at a given filepath and reads it",
+        "description" : "Read a local file and return its contents. Use when the user asks to read, summarise or analyse a file.",
         "input_schema" : {
             "type" : "object",
             "properties" : {    
@@ -102,9 +117,9 @@ TOOL_SCHEMAS = [
             "required": ["filepath"]
         }
     },
-        {
+    {
         "name" : "file_writer",
-        "description" : "This tool opens a file at a given filepath and either writes or appends text given by the user, default is writing",
+        "description" : "Write or append text to a local file. Use when the user wants to save, create or add to a file.",
         "input_schema" : {
             "type" : "object",
             "properties" : {    
@@ -114,6 +129,17 @@ TOOL_SCHEMAS = [
             },
             "required": ["filepath"],
             "required": ["content"]
+        }
+    }
+    {
+        "name" : "web_search",
+        "description": "Search the web with DuckDuckGo. Use this for current information, news, prices, or anything that requires up-to-date knowledge.",
+        "input_schema" : {
+            "type" : "object",
+            "properties" : {    
+            "query" : {"type": "string"}
+            },
+            "required": ["query"]
         }
     }
 
@@ -133,7 +159,8 @@ Dispatch table maps tool names to functions so run_tool() can look them up
 TOOLS = {
     "calculator" : calculator,
     "file_reader" : file_reader,
-    "file_writer" : file_writer
+    "file_writer" : file_writer,
+    "web_search" : web_search,
 }
 
 
