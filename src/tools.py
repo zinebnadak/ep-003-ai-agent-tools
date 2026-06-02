@@ -13,7 +13,8 @@ code_executor
 from models import ToolResult
 from pathlib import Path
 from ddgs import DDGS
-import json
+import requests
+from bs4 import BeautifulSoup
 
 def calculator(expression: str) -> ToolResult:      #the user enters an expression, and from this function we will get out predefined model: name, result, success (or error)
     try:
@@ -64,7 +65,26 @@ print(file_writer("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md", "hejdå", 
 '''
 
 
-def web_search(query: str):
+def web_search(query: str) -> ToolResult:
+    try: 
+        lines = []
+        results = DDGS().text(query, max_results = 3)
+        for result in results:
+            lines.append(f"{result['title']}\n{result['body']}\n{result['href']}")
+        formatted_result = "\n\n".join(lines)
+        return ToolResult(tool_name="web_search", result=f'Results for "{query}": {formatted_result}', success = True, error = None) 
+    except Exception as e:
+        return ToolResult(tool_name="web_search", result="", success = False, error = str(e))
+
+'''
+The \n characters will render as actual newlines when Claude processes it
+print(web_search("How old can a cat be?"))
+
+'''
+
+
+
+def web_search(query: str) -> ToolResult:
     try: 
         lines = []
         results = DDGS().text(query, max_results = 3)
@@ -80,13 +100,40 @@ The \n characters will render as actual newlines when Claude processes it
 print(web_search("How old can a cat be?"))
 '''
 
+def web_scraper(url: str) -> ToolResult:
+    try: 
+        response = requests.get(url)
+        bad_html = response.text
+        parsed = BeautifulSoup(bad_html, "html.parser")
+        text = parsed.get_text()
+        lines = [line.strip() for line in text.splitlines() if line.strip()] #if line.strip() means if the line is not empty after stripping whitespace
+        clean_response = "\n".join(lines)
+        return ToolResult(tool_name="web_scraper", result=f'Content results for "{url}": {clean_response}', success = True, error = None) 
+    
+    except Exception as e:
+        return ToolResult(tool_name="web_scraper", result="", success = False, error = str(e)) 
 
+'''
+Small issue: the \n dont render as newlines, but claude will be able to read it anyway...
+print(web_scraper("hts://github.com/zinebnadak"))
+'''
 
+def wikipedia(topic: str) -> ToolResult:
+    
+    try:
+        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{topic}"
+        headers = {"User-Agent": "EP3Agent/1.0 (educational project; python)"} #bcs of robot policy
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        summary = data["extract"]
+        return ToolResult(tool_name="wikipedia", result=f"{summary}", success=True, error=None)
+    except Exception as e:
+        return ToolResult(tool_name="wikipedia", result="", success=False, error=str(e))
 
-
-
-
-
+'''
+Same here, i get \n
+print(wikipedia("zinebnadak"))
+'''
 
 
 
@@ -130,7 +177,7 @@ TOOL_SCHEMAS = [
             "required": ["filepath"],
             "required": ["content"]
         }
-    }
+    },
     {
         "name" : "web_search",
         "description": "Search the web with DuckDuckGo. Use this for current information, news, prices, or anything that requires up-to-date knowledge.",
@@ -141,16 +188,31 @@ TOOL_SCHEMAS = [
             },
             "required": ["query"]
         }
+    },
+    {
+        "name" : "web_scraper",
+        "description": "Fetch a URL and return its readable text content. Use this when you have a specific URL and need the full page content.",
+        "input_schema" : {
+            "type" : "object",
+            "properties" : {    
+            "url" : {"type": "string"}
+            },
+            "required": ["url"]
+        }
+    },
+    {
+        "name" : "wikipedia",
+        "description": "fetches a Wikipedia article summary of a specific topic",
+        "input_schema" : {
+            "type" : "object",
+            "properties" : {    
+            "topic" : {"type": "string"}
+            },
+            "required": ["topic"]
+        }
     }
 
 ]
-
-#if the user says "save this to a file" it writes, if the user says "add this to my notes" it appends
-
-
-
-
-
 
 
 '''
@@ -161,6 +223,8 @@ TOOLS = {
     "file_reader" : file_reader,
     "file_writer" : file_writer,
     "web_search" : web_search,
+    "web_scraper" : web_scraper,
+    "wikipedia" : wikipedia
 }
 
 
