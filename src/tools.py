@@ -1,5 +1,5 @@
 '''
-7 tools in total:
+7 tools:
 calculator
 file_reader
 file_writer
@@ -9,12 +9,12 @@ wikipedia
 code_executor
 '''
 
-
 from models import ToolResult
 from pathlib import Path
 from ddgs import DDGS
 import requests
 from bs4 import BeautifulSoup
+import subprocess 
 
 def calculator(expression: str) -> ToolResult:      #the user enters an expression, and from this function we will get out predefined model: name, result, success (or error)
     try:
@@ -82,24 +82,6 @@ print(web_search("How old can a cat be?"))
 
 '''
 
-
-
-def web_search(query: str) -> ToolResult:
-    try: 
-        lines = []
-        results = DDGS().text(query, max_results = 3)
-        for result in results:
-            lines.append(f"{result['title']}\n{result['body']}\n{result['href']}")
-        formatted_result = "\n\n".join(lines)
-        return ToolResult(tool_name="web_search", result=f'Results for "{query}": {formatted_result}', success = True, error = None) 
-    except Exception as e:
-        return ToolResult(tool_name="web_search", result="", success = False, error = str(e))
-
-'''
-The \n characters will render as actual newlines when Claude processes it
-print(web_search("How old can a cat be?"))
-'''
-
 def web_scraper(url: str) -> ToolResult:
     try: 
         response = requests.get(url)
@@ -135,6 +117,28 @@ Same here, i get \n
 print(wikipedia("zinebnadak"))
 '''
 
+
+
+def code_executor(code: str) -> ToolResult:
+
+    try: 
+        extracted = subprocess.run(["python3", "-c", code], capture_output = True, text = True, timeout=15)  # -c run a string of code directly instead of a file ,subprocess needs a list
+        result = extracted.stdout #stout prints the output
+        error = extracted.stderr if extracted.stderr else None #stderr is where all errors in python go
+        return ToolResult(tool_name="code_executor", result=extracted.stdout, success=extracted.returncode == 0, error=error)
+    
+    except subprocess.TimeoutExpired:
+        return ToolResult(tool_name="code_executor", result="", success=False, error="Code timed out after 15 seconds")
+    
+    except Exception as e:
+        return ToolResult(tool_name="code_executor", result="", success=False, error=str(e))
+
+'''
+Test timeout, stdout and stderr:
+print(code_executor("while True: pass"))
+print(code_executor("print('hello')"))          
+print(code_executor("1/0"))
+'''
 
 
 '''
@@ -174,8 +178,7 @@ TOOL_SCHEMAS = [
             "content" : {"type": "string"},
             "mode" : {"type": "string"}
             },
-            "required": ["filepath"],
-            "required": ["content"]
+            "required": ["filepath", "content"],
         }
     },
     {
@@ -210,6 +213,17 @@ TOOL_SCHEMAS = [
             },
             "required": ["topic"]
         }
+    },
+    {
+        "name" : "code_executor",
+        "description": "runs a Python file and returns its output",
+        "input_schema" : {
+            "type" : "object",
+            "properties" : {    
+            "code" : {"type": "string"}
+            },
+            "required": ["code"]
+        }
     }
 
 ]
@@ -224,12 +238,9 @@ TOOLS = {
     "file_writer" : file_writer,
     "web_search" : web_search,
     "web_scraper" : web_scraper,
-    "wikipedia" : wikipedia
+    "wikipedia" : wikipedia,
+    "code_executor" : code_executor
 }
-
-
-
-
 
 
 '''
