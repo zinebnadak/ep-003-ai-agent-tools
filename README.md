@@ -10,9 +10,9 @@ Plain English description of what was implemented. What it does and how it works
 
 
 
-web_search        — DuckDuckGo
-wikipedia         — REST API
-web_scraper       — fetch a URL, return clean text
+web_search        — Searches DuckDuckGo, returns a list of results
+wikipedia         — REST API, fetches a Wikipedia article summary
+web_scraper       — takes a specific URL and reads the full page content, returns clean text (no html)
 file_reader       — read a local file
 file_writer       — write/append to a local file
 code_executor     — run Python, return output
@@ -27,7 +27,9 @@ Calculator        — eval a math expression
 - I wanted to do `memory store` tool but realized it might be to complex for what i know, so I´ll learn to build it later :)
 
 - verbode - agents thought process
-
+- all python built-ins: python -c "import builtins; print(dir(builtins))"
+- when creating tool schemas for LLM there is one difference in a field name: OpenAI uses parameters, Anthropic uses input_schema
+- Unpacking. Or "dictionary unpacking." using the ** operator 
 
 
 
@@ -80,3 +82,9 @@ cp .env.example .env
 - [requests HTTP library docs](https://pypi.org/project/requests/)
 - [rich library repo](https://github.com/Textualize/rich)
 - [rich library docs](https://rich.readthedocs.io/en/latest/introduction.html)
+
+
+- [eval built-in fucntion](https://docs.python.org/3/library/functions.html#eval)
+- [Build a tool-using agent, Ring 2 Agentic Loop, Anthropic](https://platform.claude.com/docs/en/agents-and-tools/tool-use/build-a-tool-using-agent)
+
+- [duckduckgo_search 8.1.1](https://pypi.org/project/duckduckgo-search/)

@@ -1,8 +1,7 @@
-openai
 anthropic
 python-dotenv
 wikipedia
-duckduckgo-search
+ddgs
 requests
 pydantic
 beautifulsoup4

@@ -3,9 +3,9 @@
 calculator
 file_reader
 file_writer
-web_search
-web_scraper
-wikipedia
+web_search 
+web_scraper 
+wikipedia 
 code_executor
 '''
 
@@ -61,6 +61,14 @@ def file_writer(filepath:str, content: str, mode: str = "write") -> ToolResult: 
 Supports both writing (overwriting) and appending
 print(file_writer("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md", "hejdå", "append"))
 '''
+
+
+def web_search()
+
+
+
+
+
 
 
 
