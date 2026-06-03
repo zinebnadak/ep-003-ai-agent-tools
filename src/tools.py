@@ -15,6 +15,8 @@ from ddgs import DDGS
 import requests
 from bs4 import BeautifulSoup
 import subprocess 
+from datetime import date
+
 
 def calculator(expression: str) -> ToolResult:      #the user enters an expression, and from this function we will get out predefined model: name, result, success (or error)
     try:
@@ -66,21 +68,25 @@ print(file_writer("/Users/nadak/ep-003-ai-agent-tools/docs/notes.md", "hejdå", 
 
 
 def web_search(query: str) -> ToolResult:
-    try: 
+    try:
+        dated_query = f"{query} {date.today()}"
         lines = []
-        results = DDGS().text(query, max_results = 3)
+        results = DDGS().text(dated_query, max_results=3)
         for result in results:
             lines.append(f"{result['title']}\n{result['body']}\n{result['href']}")
         formatted_result = "\n\n".join(lines)
-        return ToolResult(tool_name="web_search", result=f'Results for "{query}": {formatted_result}', success = True, error = None) 
+        return ToolResult(tool_name="web_search", result=f'Results for "{query}": {formatted_result}', success=True, error=None)
     except Exception as e:
-        return ToolResult(tool_name="web_search", result="", success = False, error = str(e))
+        return ToolResult(tool_name="web_search", result="", success=False, error=str(e))
 
 '''
 The \n characters will render as actual newlines when Claude processes it
 print(web_search("How old can a cat be?"))
-
 '''
+
+
+
+
 
 def web_scraper(url: str) -> ToolResult:
     try: 
