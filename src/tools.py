@@ -85,9 +85,6 @@ print(web_search("How old can a cat be?"))
 '''
 
 
-
-
-
 def web_scraper(url: str) -> ToolResult:
     try: 
         response = requests.get(url)

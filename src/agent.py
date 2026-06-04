@@ -1,24 +1,38 @@
 from anthropic import Anthropic
 from dotenv import load_dotenv
 from tools import TOOL_SCHEMAS, run_tool
+import time 
 
 load_dotenv()
 
-def run_agent(goal: str) -> str:
+#*args = positional arguments (like block.name, block.input)
+#**kwargs = keyword arguments (like model="claude-haiku-4-5")
+#fn is the tool function
+
+def spinner(message: str, fn, *args, **kwargs): 
+    print(f" {message}...", end="", flush = True)
+    start = time.time() # record time before function runs
+    result = fn(*args, **kwargs)
+    elapsed = time.time() - start # record time after function runs 
+    print(f" done in {elapsed:.1f}s")
+    return result
+
+def run_agent(messages: list) -> str:
     client = Anthropic() #our client
-    messages = [{"role": "user", "content": goal}]  #our history
 
     #loop until claude stops asking for tools
     while True:
-        response = client.messages.create(  #response block
+        #response block
+        response = spinner("\nThinking",client.messages.create,  
             model="claude-haiku-4-5",
             max_tokens=1024,
             tools=TOOL_SCHEMAS,
             messages=messages
-        )
+        ) #here the spinner takes this message as parameter and runs as a function on this message - *kawgs
 
         #checks if Claude is done without calling a tool
-        if response.stop_reason != "tool_use": 
+        if response.stop_reason != "tool_use":
+            messages.append({"role": "assistant", "content": response.content}) 
             return response.content[0].text
 
         # append Claude's response to messages list history
@@ -28,7 +42,8 @@ def run_agent(goal: str) -> str:
         tool_results = [] #format Anthropic requires when you send tool results back, tells Anthropic this is a tool result, not a user message. We will add this to history content
         for block in response.content: #response.content is a list and contains multiple blocks.
             if block.type == "tool_use": #claude is using a tool
-                result = run_tool(block.name, block.input) # Our run_tool function - the tool claude decided to call from the schema and the arguments 
+                block_input_value = list(block.input.values())[0] #get block input value
+                result = spinner(f'Searching with {block.name} for "{block_input_value}"', run_tool, block.name, block.input) # Our run_tool function. Here also the spinner takes this as parameter and runs as a function on this result - *args
                 tool_results.append({
                     "type": "tool_result", 
                     "tool_use_id": block.id,
@@ -38,10 +53,8 @@ def run_agent(goal: str) -> str:
         # append tool results back to messages
         messages.append({"role": "user", "content": tool_results})
 
-'''
-Test:
-print(run_agent("What is 25 * 48?"))
-'''
+
+
 
 
 

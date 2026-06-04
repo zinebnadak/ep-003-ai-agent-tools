@@ -11,9 +11,5 @@ class ToolResult(BaseModel):
     error : str | None = None   #default of None
 
 
-
-
-
-
 # From main.py → agent.py: What does the agent need to know to run? 
 # class AgentConfig (Basemodel)
