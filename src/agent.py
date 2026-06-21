@@ -2,6 +2,8 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 from tools import TOOL_SCHEMAS, run_tool
 import time 
+from rich.console import Console
+console = Console()
 
 load_dotenv()
 
@@ -9,12 +11,15 @@ load_dotenv()
 #**kwargs = keyword arguments (like model="claude-haiku-4-5")
 #fn is the tool function
 
+PINK = "\033[38;5;125m"   
+RESET = "\033[0m"
+
 def spinner(message: str, fn, *args, **kwargs): 
-    print(f" {message}...", end="", flush = True)
-    start = time.time() # record time before function runs
+    console.print(f"[#99004c] {message}...[/#99004c]", end="", highlight=False)
+    start = time.time()
     result = fn(*args, **kwargs)
-    elapsed = time.time() - start # record time after function runs 
-    print(f" done in {elapsed:.1f}s")
+    elapsed = time.time() - start
+    console.print(f"[#99004c] done in {elapsed:.1f}s[/#99004c]", highlight=False)
     return result
 
 def run_agent(messages: list) -> str:
