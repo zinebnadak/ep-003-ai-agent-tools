@@ -2,6 +2,8 @@
 
 > A normal AI answers from pre-trained knowledge and that is all it knows, it can take no actions. An agent with tools can actually do things: search the web, calculate, read files. It uses a goal-oriented loop like Observe → Think → Act.
 
+![](images/pic1.png)
+
 ## The Problem / The Question
 I wanted to understand what actually makes an AI an "agent" — not just a chatbot that answers questions. I built this without a framework like LangChain so I could work through the loop, tool dispatch, and message formatting on my ownn. (Also I won´t even need langchain complexity for this small project I am building)
 
